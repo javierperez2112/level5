@@ -9,6 +9,9 @@
 
 #include <iostream>
 #include <string>
+#include <filesystem>
+#include <string>
+#include "CommandLineParser.h"
 
 #include <sqlite3.h>
 
@@ -35,8 +38,9 @@ int main(int argc,
          const char *argv[])
 {
     char *databaseFile = "index.db";
-    sqlite3 *database;
+    sqlite3 *database = NULL;
     char *databaseErrorMessage;
+    std::string wwwDir = "./../www";
 
     // Open database file
     cout << "Opening database..." << endl;
@@ -50,20 +54,19 @@ int main(int argc,
     // Create a sample table
     cout << "Creating table..." << endl;
     if (sqlite3_exec(database,
-                     "CREATE TABLE room_occupation "
-                     "(id INTEGER PRIMARY KEY,"
-                     "room varchar DEFAULT NULL,"
-                     "reserved_from DATETIME,"
-                     "reserved_until DATETIME);",
+                     "CREATE VIRTUAL TABLE fulltext USING fts5 ("
+                     "title TEXT, "
+                     "link TEXT, "
+                     "body TEXT);",
                      NULL,
-                     0,
+                     NULL,
                      &databaseErrorMessage) != SQLITE_OK)
         cout << "Error: " << sqlite3_errmsg(database) << endl;
 
     // Delete previous entries if table already existed
     cout << "Deleting previous entries..." << endl;
     if (sqlite3_exec(database,
-                     "DELETE FROM room_occupation;",
+                     "DELETE FROM fulltext;",
                      NULL,
                      0,
                      &databaseErrorMessage) != SQLITE_OK)
@@ -72,29 +75,16 @@ int main(int argc,
     // Create sample entries
     cout << "Creating sample entries..." << endl;
     if (sqlite3_exec(database,
-                     "INSERT INTO room_occupation (room, reserved_from, reserved_until) VALUES "
-                     "('401F','2022-03-03 15:00:00','2022-03-03 16:00:00');",
+                     "INSERT INTO fulltext (title, link, body) VALUES "
+                     "('PORNHUB','pornhub.com','Pornoooo');",
                      NULL,
                      0,
                      &databaseErrorMessage) != SQLITE_OK)
         cout << "Error: " << sqlite3_errmsg(database) << endl;
+
     if (sqlite3_exec(database,
-                     "INSERT INTO room_occupation (room, reserved_from, reserved_until) VALUES "
-                     "('501F','2022-03-03 15:00:00','2022-03-03 17:00:00');",
-                     NULL,
-                     0,
-                     &databaseErrorMessage) != SQLITE_OK)
-        cout << "Error: " << sqlite3_errmsg(database) << endl;
-    if (sqlite3_exec(database,
-                     "INSERT INTO room_occupation (room, reserved_from, reserved_until) VALUES "
-                     "('001R','2022-03-03 15:00:00','2022-03-03 16:30:00');",
-                     NULL,
-                     0,
-                     &databaseErrorMessage) != SQLITE_OK)
-        cout << "Error: " << sqlite3_errmsg(database) << endl;
-    if (sqlite3_exec(database,
-                     "INSERT INTO room_occupation (room, reserved_from, reserved_until) VALUES "
-                     "('1001F','2022-03-03 15:30:00','2022-03-03 16:30:00');",
+                     "INSERT INTO fulltext (title, link, body) VALUES "
+                     "('XVIDEOS','xvideos.com','Más pornooo');",
                      NULL,
                      0,
                      &databaseErrorMessage) != SQLITE_OK)
@@ -103,7 +93,7 @@ int main(int argc,
     // Fetch entries
     cout << "Fetching entries..." << endl;
     if (sqlite3_exec(database,
-                     "SELECT * from room_occupation;",
+                     "SELECT * from fulltext;",
                      onDatabaseEntry,
                      0,
                      &databaseErrorMessage) != SQLITE_OK)
