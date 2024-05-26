@@ -36,13 +36,18 @@ static int onDatabaseEntry(void *userdata,
     return 0;
 }
 
-int main(int argc,
-         const char *argv[])
+int main(int argc, const char *argv[])
 {
+    CommandLineParser parser(argc, argv);
     char *databaseFile = "index.db";
     sqlite3 *database = NULL;
     char *databaseErrorMessage;
-    std::filesystem::path wikiPath = "./../www/wiki";
+    if(!parser.hasOption("-h"))
+    {
+        cout << "Error: must specify a path!" << endl;
+        return 1;
+    }
+    std::filesystem::path wikiPath = parser.getOption("-h") + "/wiki";
 
     // Open database file
     cout << "Opening database..." << endl;
