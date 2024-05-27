@@ -18,23 +18,22 @@
 
 using namespace std;
 
+typedef struct {
+    string name;
+    filesystem::path path;
+} Article;
+
 static int onDatabaseEntry(void *userdata,
                            int argc,
                            char **argv,
                            char **azColName)
 {
     cout << "--- Entry found:" << endl;
-    cout << argv[0] << endl;
-    ((vector<string>*)userdata)->push_back(argv[0]);
-    return 0;
-    for (int i = 0; i < argc; i++)
-    {
-        if (argv[i])
-            cout << azColName[i] << ": " << argv[i] << endl;
-        else
-            cout << azColName[i] << ": " << "NULL" << endl;
-    }
-
+    string fileName = argv[0];
+    fileName = fileName.substr(0, fileName.find_last_of('.'));
+    cout << fileName << endl;
+    filesystem::path filePath = argv[1];
+    ((vector<Article> *)userdata)->push_back({fileName, filePath});
     return 0;
 }
 
@@ -123,11 +122,11 @@ bool HttpRequestHandler::handleRequest(string url,
         sqlite3_open(databaseFile, &database);
         std::string searchCommand = "SELECT * from fulltext WHERE fulltext MATCH '" + searchString + "' ORDER BY rank;";
         cout << "\nSearching: " << searchString << endl;
-        vector<string> results;
+        vector<Article> results;
 
         auto start = chrono::high_resolution_clock::now();
 
-        sqlite3_exec(database, searchCommand.c_str(), onDatabaseEntry, (void*)&results, &databaseErrorMessage);
+        sqlite3_exec(database, searchCommand.c_str(), onDatabaseEntry, (void *)&results, &databaseErrorMessage);
 
         auto stop = chrono::high_resolution_clock::now();
         float searchTime = chrono::duration_cast<chrono::microseconds>(stop - start).count();
@@ -137,9 +136,11 @@ bool HttpRequestHandler::handleRequest(string url,
         responseString += "<div class=\"results\">" + to_string(results.size()) +
                           " results (" + to_string(searchTime) + " seconds):</div>";
         for (auto &result : results)
+        {
+            string articlePath = filesystem::relative(result.path, this->homePath);
             responseString += "<div class=\"result\"><a href=\"" +
-                              result + "\">" + result + "</a></div>";
-
+                              articlePath + "\">" + result.name + "</a></div>";
+        }
         // Trailer
         responseString += "    </article>\
 </body>\
