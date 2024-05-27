@@ -31,6 +31,9 @@ static int onDatabaseEntry(void *userdata,
     cout << "--- Entry found:" << endl;
     string fileName = argv[0];
     fileName = fileName.substr(0, fileName.find_last_of('.'));
+    string::iterator iter = fileName.begin();
+    while(++iter != fileName.end())
+        if(*iter == '_') *iter = ' ';
     cout << fileName << endl;
     filesystem::path filePath = argv[1];
     ((vector<Article> *)userdata)->push_back({fileName, filePath});
@@ -82,6 +85,7 @@ bool HttpRequestHandler::handleRequest(string url,
                                        HttpArguments arguments,
                                        vector<char> &response)
 {
+    auto start = chrono::high_resolution_clock::now();
     string searchPage = "/search";
     if (url.substr(0, searchPage.size()) == searchPage)
     {
@@ -120,11 +124,9 @@ bool HttpRequestHandler::handleRequest(string url,
         sqlite3 *database = NULL;
         char *databaseErrorMessage;
         sqlite3_open(databaseFile, &database);
-        std::string searchCommand = "SELECT * from fulltext WHERE fulltext MATCH '" + searchString + "' ORDER BY rank;";
+        string searchCommand = "SELECT * from fulltext WHERE fulltext MATCH '" + searchString + "' ORDER BY rank;";
         cout << "\nSearching: " << searchString << endl;
         vector<Article> results;
-
-        auto start = chrono::high_resolution_clock::now();
 
         if(sqlite3_exec(database, 
                         searchCommand.c_str(), 
