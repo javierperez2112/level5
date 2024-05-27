@@ -99,8 +99,7 @@ int main(int argc, const char *argv[])
         }
         entryFile.close();
         // Add new entry to table.
-        std::string SQLcommand = "INSERT INTO fulltext (title, path, body) VALUES";
-        SQLcommand.append("('");
+        std::string SQLcommand = "INSERT INTO fulltext (title, path, body) VALUES('";
         SQLcommand.append(entryTitle);
         SQLcommand.append("','");
         SQLcommand.append(removeTags(entryPath));

@@ -18,7 +18,8 @@
 
 using namespace std;
 
-typedef struct {
+typedef struct
+{
     string name;
     filesystem::path path;
 } Article;
@@ -32,8 +33,9 @@ static int onDatabaseEntry(void *userdata,
     string fileName = argv[0];
     fileName = fileName.substr(0, fileName.find_last_of('.'));
     string::iterator iter = fileName.begin();
-    while(++iter != fileName.end())
-        if(*iter == '_') *iter = ' ';
+    while (++iter != fileName.end())
+        if (*iter == '_')
+            *iter = ' ';
     cout << fileName << endl;
     filesystem::path filePath = argv[1];
     ((vector<Article> *)userdata)->push_back({fileName, filePath});
@@ -91,8 +93,15 @@ bool HttpRequestHandler::handleRequest(string url,
     {
         string searchString;
         if (arguments.find("q") != arguments.end())
+        {
             searchString = arguments["q"];
+            string::iterator iter;
+            // Eliminate reserved characters.
+            for (iter = searchString.begin(); iter != searchString.end(); iter++)
+                if(*iter == '\'') *iter = ' ';
+        }
 
+        string::iterator iter;
         // Header
         string responseString = string("<!DOCTYPE html>\
 <html>\
@@ -128,14 +137,14 @@ bool HttpRequestHandler::handleRequest(string url,
         cout << "\nSearching: " << searchString << endl;
         vector<Article> results;
 
-        if(sqlite3_exec(database, 
-                        searchCommand.c_str(), 
-                        onDatabaseEntry, 
-                        (void *)&results, 
-                        &databaseErrorMessage) != SQLITE_OK)
-                        {
-                            cout << "Error: " << sqlite3_errmsg(database) << endl;
-                        }
+        if (sqlite3_exec(database,
+                         searchCommand.c_str(),
+                         onDatabaseEntry,
+                         (void *)&results,
+                         &databaseErrorMessage) != SQLITE_OK)
+        {
+            cout << "Error: " << sqlite3_errmsg(database) << endl;
+        }
 
         auto stop = chrono::high_resolution_clock::now();
         float searchTime = chrono::duration_cast<chrono::microseconds>(stop - start).count();
