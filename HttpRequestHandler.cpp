@@ -10,10 +10,33 @@
 #include <filesystem>
 #include <fstream>
 #include <iostream>
+#include <chrono>
+
+#include <sqlite3.h>
 
 #include "HttpRequestHandler.h"
 
 using namespace std;
+
+static int onDatabaseEntry(void *userdata,
+                           int argc,
+                           char **argv,
+                           char **azColName)
+{
+    cout << "--- Entry found:" << endl;
+    cout << argv[0] << endl;
+    ((vector<string>*)userdata)->push_back(argv[0]);
+    return 0;
+    for (int i = 0; i < argc; i++)
+    {
+        if (argv[i])
+            cout << azColName[i] << ": " << argv[i] << endl;
+        else
+            cout << azColName[i] << ": " << "NULL" << endl;
+    }
+
+    return 0;
+}
 
 HttpRequestHandler::HttpRequestHandler(string homePath)
 {
@@ -57,8 +80,8 @@ bool HttpRequestHandler::serve(string url, vector<char> &response)
 }
 
 bool HttpRequestHandler::handleRequest(string url,
-                                               HttpArguments arguments,
-                                               vector<char> &response)
+                                       HttpArguments arguments,
+                                       vector<char> &response)
 {
     string searchPage = "/search";
     if (url.substr(0, searchPage.size()) == searchPage)
@@ -93,8 +116,22 @@ bool HttpRequestHandler::handleRequest(string url,
         ");
 
         // YOUR JOB: fill in results
-        float searchTime = 0.1F;
+        // Open database.
+        char *databaseFile = "index.db";
+        sqlite3 *database = NULL;
+        char *databaseErrorMessage;
+        sqlite3_open(databaseFile, &database);
+        std::string searchCommand = "SELECT * from fulltext WHERE fulltext MATCH '" + searchString + "' ORDER BY rank;";
+        cout << "\nSearching: " << searchString << endl;
         vector<string> results;
+
+        auto start = chrono::high_resolution_clock::now();
+
+        sqlite3_exec(database, searchCommand.c_str(), onDatabaseEntry, (void*)&results, &databaseErrorMessage);
+
+        auto stop = chrono::high_resolution_clock::now();
+        float searchTime = chrono::duration_cast<chrono::microseconds>(stop - start).count();
+        searchTime /= 10.0E6F;
 
         // Print search results
         responseString += "<div class=\"results\">" + to_string(results.size()) +
