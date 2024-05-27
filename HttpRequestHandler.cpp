@@ -120,7 +120,7 @@ bool HttpRequestHandler::handleRequest(string url,
         sqlite3 *database = NULL;
         char *databaseErrorMessage;
         sqlite3_open(databaseFile, &database);
-        std::string searchCommand = "SELECT * from fulltext WHERE fulltext MATCH '" + searchString + "';";
+        std::string searchCommand = "SELECT * from fulltext WHERE fulltext MATCH '" + searchString + "' ORDER BY rank;";
         cout << "\nSearching: " << searchString << endl;
         vector<Article> results;
 

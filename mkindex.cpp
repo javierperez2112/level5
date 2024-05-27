@@ -143,7 +143,6 @@ int main(int argc, const char *argv[])
 /**
  * @brief Remove HTML tags from .html file text.
  * @note Also used on titles to double '.
- * @bug Erases part of the text.
  *
  * @param text The text from the HTML file.
  * @return The text without tags.
@@ -161,7 +160,7 @@ static string removeTags(string &text)
         }
         if (c == '>')
         {
-            inTag == false;
+            inTag = false;
             continue;
         }
         if (!inTag)
