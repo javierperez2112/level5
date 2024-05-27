@@ -95,8 +95,9 @@ int main(int argc, const char *argv[])
         string entryLine, entryText;
         while (getline(entryFile, entryLine))
         {
-            entryText.append(removeTags(entryLine));
+            entryText.append(entryLine);
         }
+        entryText = removeTags(entryText);
         entryFile.close();
         // Add new entry to table.
         std::string SQLcommand = "INSERT INTO fulltext (title, path, body) VALUES('";
