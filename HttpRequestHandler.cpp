@@ -120,13 +120,20 @@ bool HttpRequestHandler::handleRequest(string url,
         sqlite3 *database = NULL;
         char *databaseErrorMessage;
         sqlite3_open(databaseFile, &database);
-        std::string searchCommand = "SELECT * from fulltext WHERE fulltext MATCH '" + searchString + "' ORDER BY rank;";
+        std::string searchCommand = "SELECT * from fulltext WHERE fulltext MATCH '" + searchString + "';";
         cout << "\nSearching: " << searchString << endl;
         vector<Article> results;
 
         auto start = chrono::high_resolution_clock::now();
 
-        sqlite3_exec(database, searchCommand.c_str(), onDatabaseEntry, (void *)&results, &databaseErrorMessage);
+        if(sqlite3_exec(database, 
+                        searchCommand.c_str(), 
+                        onDatabaseEntry, 
+                        (void *)&results, 
+                        &databaseErrorMessage) != SQLITE_OK)
+                        {
+                            cout << "Error: " << sqlite3_errmsg(database) << endl;
+                        }
 
         auto stop = chrono::high_resolution_clock::now();
         float searchTime = chrono::duration_cast<chrono::microseconds>(stop - start).count();

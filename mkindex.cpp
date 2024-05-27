@@ -17,7 +17,7 @@
 
 using namespace std;
 
-static std::string removeTags(std::string text);
+static string removeTags(string &text);
 
 static int onDatabaseEntry(void *userdata,
                            int argc,
@@ -42,7 +42,7 @@ int main(int argc, const char *argv[])
     char *databaseFile = "index.db";
     sqlite3 *database = NULL;
     char *databaseErrorMessage;
-    if(!parser.hasOption("-h"))
+    if (!parser.hasOption("-h"))
     {
         cout << "Error: must specify a path!" << endl;
         return 1;
@@ -87,34 +87,33 @@ int main(int argc, const char *argv[])
         cout << "Error: " << sqlite3_errmsg(database) << endl;
 
     // Add entries (without HTML tags) to the table.
-    for (auto &entry : std::filesystem::directory_iterator(wikiPath))
+    for (auto &entry : filesystem::directory_iterator(wikiPath))
     {
         if (!entry.is_regular_file())
         {
             continue;
         }
-        std::ifstream entryFile(entry.path());
+        ifstream entryFile(entry.path());
         if (!entryFile.is_open())
         {
             continue;
         }
-        std::string entryTitle = removeTags(entry.path().filename());
+        string entryPath = entry.path();
+        string fileName = entry.path().filename();
+        string entryTitle = removeTags(fileName);
         cout << "Addind entry: " << entryTitle << endl;
-        std::string entryLine, entryText;
+        string entryLine, entryText;
         while (getline(entryFile, entryLine))
         {
-            std::string noTagsLine = removeTags(entryLine);
-            if (!noTagsLine.empty())
-            {
-                entryText.append(noTagsLine);
-            }
+            entryText.append(removeTags(entryLine));
         }
+        entryFile.close();
         // Add new entry to table.
         std::string SQLcommand = "INSERT INTO fulltext (title, path, body) VALUES";
         SQLcommand.append("('");
         SQLcommand.append(entryTitle);
         SQLcommand.append("','");
-        SQLcommand.append(removeTags(entry.path()));
+        SQLcommand.append(removeTags(entryPath));
         SQLcommand.append("','");
         SQLcommand.append(entryText);
         SQLcommand.append("');");
@@ -127,15 +126,14 @@ int main(int argc, const char *argv[])
     }
 
     // Fetch entries
-    /*
+
     cout << "Fetching entries..." << endl;
     if (sqlite3_exec(database,
-                     "SELECT * from fulltext;",
+                     "SELECT * from fulltext WHERE fulltext MATCH 'gato';",
                      onDatabaseEntry,
                      0,
                      &databaseErrorMessage) != SQLITE_OK)
         cout << "Error: " << sqlite3_errmsg(database) << endl;
-    */
 
     // Close database
     cout << "Closing database..." << endl;
@@ -145,13 +143,14 @@ int main(int argc, const char *argv[])
 /**
  * @brief Remove HTML tags from .html file text.
  * @note Also used on titles to double '.
+ * @bug Erases part of the text.
  *
  * @param text The text from the HTML file.
  * @return The text without tags.
  */
-static std::string removeTags(std::string text)
+static string removeTags(string &text)
 {
-    std::string newText;
+    string newText;
     bool inTag = false;
     for (char c : text)
     {
@@ -167,10 +166,10 @@ static std::string removeTags(std::string text)
         }
         if (!inTag)
         {
-            newText.push_back(c);
-            if(c == '\'')   // Lo atamos con alambre.
+            newText += c;
+            if (c == '\'') // Lo atamos con alambre.
             {
-                newText.push_back(c);
+                newText += c;
             }
         }
     }
