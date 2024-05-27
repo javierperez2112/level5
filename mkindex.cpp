@@ -76,16 +76,6 @@ int main(int argc, const char *argv[])
                      &databaseErrorMessage) != SQLITE_OK)
         cout << "Error: " << sqlite3_errmsg(database) << endl;
 
-    // Create sample entries
-    cout << "Creating sample entries..." << endl;
-    if (sqlite3_exec(database,
-                     "INSERT INTO fulltext (title, path, body) VALUES "
-                     "('PORNHUB','pornhub.com','Pornoooo');",
-                     NULL,
-                     0,
-                     &databaseErrorMessage) != SQLITE_OK)
-        cout << "Error: " << sqlite3_errmsg(database) << endl;
-
     // Add entries (without HTML tags) to the table.
     for (auto &entry : filesystem::directory_iterator(wikiPath))
     {
@@ -124,17 +114,6 @@ int main(int argc, const char *argv[])
                          &databaseErrorMessage) != SQLITE_OK)
             cout << "Error: " << sqlite3_errmsg(database) << endl;
     }
-
-    // Fetch entries
-
-    cout << "Fetching entries..." << endl;
-    if (sqlite3_exec(database,
-                     "SELECT * from fulltext WHERE fulltext MATCH 'gato';",
-                     onDatabaseEntry,
-                     0,
-                     &databaseErrorMessage) != SQLITE_OK)
-        cout << "Error: " << sqlite3_errmsg(database) << endl;
-
     // Close database
     cout << "Closing database..." << endl;
     sqlite3_close(database);
@@ -166,7 +145,7 @@ static string removeTags(string &text)
         if (!inTag)
         {
             newText += c;
-            if (c == '\'') // Lo atamos con alambre.
+            if (c == '\'')
             {
                 newText += c;
             }
