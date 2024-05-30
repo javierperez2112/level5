@@ -1,6 +1,9 @@
 /**
  * @file HttpRequestHandler.h
  * @author Marc S. Ressl
+ * @author Ignacio Rojana
+ * @author Javier Pérez
+ * @author Rocco Gastaldi
  * @brief EDAoggle search engine
  * @version 0.3
  *
@@ -165,7 +168,7 @@ bool HttpRequestHandler::handleRequest(string url,
                           " results (" + to_string(searchTime) + " seconds):</div>";
         for (auto &result : results)
         {
-            string articlePath = filesystem::relative(result.path, this->homePath);
+            string articlePath = filesystem::relative(result.path, this->homePath).string();
             responseString += "<div class=\"result\"><a href=\"" +
                               articlePath + "\">" + result.name + "</a></div>";
         }

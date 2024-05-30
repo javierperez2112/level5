@@ -1,6 +1,9 @@
 /**
  * @file mkindex.cpp
  * @author Marc S. Ressl
+ * @author Ignacio Rojana
+ * @author Javier Pérez
+ * @author Rocco Gastaldi
  * @brief Makes a database index
  * @version 0.3
  *
@@ -88,8 +91,8 @@ int main(int argc, const char *argv[])
         {
             continue;
         }
-        string entryPath = entry.path();
-        string fileName = entry.path().filename();
+        string entryPath = entry.path().string();
+        string fileName = entry.path().filename().string();
         string entryTitle = removeTags(fileName);
         cout << "Addind entry: " << entryTitle << endl;
         string entryLine, entryText;
