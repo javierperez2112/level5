@@ -95,10 +95,20 @@ bool HttpRequestHandler::handleRequest(string url,
         if (arguments.find("q") != arguments.end())
         {
             searchString = arguments["q"];
-            string::iterator iter;
+            string::iterator iter = searchString.begin();
+            ;
             // Eliminate reserved characters.
-            for (iter = searchString.begin(); iter != searchString.end(); iter++)
-                if(*iter == '\'') *iter = ' ';
+            while (iter != searchString.end())
+            {
+                if (*iter == '\'' || *iter == ';')
+                {
+                    iter = searchString.erase(iter);
+                }
+                else
+                {
+                    iter++;
+                }
+            }
         }
 
         string::iterator iter;

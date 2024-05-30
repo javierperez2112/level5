@@ -16,7 +16,7 @@ y el texto sin las etiquetas de HTML, eliminadas por `removeTags`. Para introduc
 Para la búsqueda, se utiliza el comando `SELECT * from fulltext WHERE fulltext MATCH 'término de búsqueda' ORDER BY rank;`. El método `handleRequest` toma el
 texto recibido del usuario y lo introduce en el comando como término de búsqueda. La extensión de FTS se encarga de devolver las filas donde se encuentre el
 texto especificado por el término de búsqueda a través de la función `onDatabaseEntry`. Para evitar solicitudes maliciosas, se elimina cualquier comilla 
-simple (') en el término de búsqueda, así todo el término quedará encerrado en comillas en el comando de SQL, y será interpretado como simple texto.
+simple (') ó punto y coma (;) en el término de búsqueda, así todo el término quedará encerrado en comillas en el comando de SQL, y será interpretado como simple texto en un sólo comando.
 
 ## Bonus point: operadores y FTS
 El índice de búsqueda se implementó con la extensión *fts5* de *sqlite3*, que además de hacer todo el trabajo para la búsqueda, implementa los operadores
