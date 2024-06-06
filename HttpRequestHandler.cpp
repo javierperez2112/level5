@@ -139,8 +139,6 @@ bool HttpRequestHandler::handleRequest(string url,
             </form>\
         </div>\
         ");
-
-        // YOUR JOB: fill in results
         // Open database.
         char *databaseFile = "index.db";
         sqlite3 *database = NULL;

@@ -138,14 +138,12 @@ static string removeTags(string &text)
         if (c == '<')
         {
             inTag = true;
-            continue;
         }
-        if (c == '>')
+        else if (c == '>')
         {
             inTag = false;
-            continue;
         }
-        if (!inTag)
+        else if (!inTag)
         {
             newText += c;
             if (c == '\'')
